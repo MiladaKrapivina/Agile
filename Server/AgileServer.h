@@ -3,14 +3,23 @@
 
 #include<QTcpServer>
 #include<QTcpSocket>
+#include <QString>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QDebug>
 class AServer: public QTcpServer
 {
     Q_OBJECT
+
     public:
-    AServer();
-    ~AServer();
+  // AServer();
+  //  ~AServer();
     QTcpSocket* socket;
     QByteArray Data;
+    QSqlDatabase db;
+    QSqlQuery *query;
+
+       void connect_to_database(); // поместить в сервер
 
 public slots:
     void startServer();
@@ -22,6 +31,6 @@ public slots:
 
 /*    myserver();
 
-
+*/
 
 #endif // AGILESERVER_H
