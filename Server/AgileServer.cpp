@@ -10,22 +10,27 @@ void AServer::startServer()
     {
         qDebug()<<"Not listening";
     }
+   connect(this, &AServer::newConnection, this, &AServer:: incomingConnection);
 }
 
-void AServer::incomingConnection(int socketDescriptor)
+void AServer::incomingConnection()
 {
-    socket = new QTcpSocket(this);
-    socket->setSocketDescriptor(socketDescriptor);
+    socket= this->nextPendingConnection();
+
+    //socket->setSocketDescriptor(socketDescriptor);
 
         connect(socket,SIGNAL(readyRead()),this,SLOT(sockReady()));
         connect(socket,SIGNAL(disconnected()),this,SLOT(sockDisc()));
 
-    qDebug()<<socketDescriptor<<" Client connected";
+    qDebug()<<" Client connected";
 
     socket->write("You are connect");
     qDebug()<<"Send client connect status - YES";
 }
+void AServer::sockReady()
+{
 
+}
 
 void AServer::sockDisc()
 {

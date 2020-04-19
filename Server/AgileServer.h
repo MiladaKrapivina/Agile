@@ -23,8 +23,8 @@ class AServer: public QTcpServer
 
 public slots:
     void startServer();
-    void incomingConnection(int socketDescriptor);
-//  void sockReady();
+    void incomingConnection();
+void sockReady();
     void sockDisc();
 };
 
