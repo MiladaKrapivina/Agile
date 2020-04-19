@@ -14,7 +14,7 @@ if(!db.isOpen()){
 query=new QSqlQuery(db);
 }
 
-void Agile::  create_user(QString name,QString email,QString password)
+void user::  create_user(QString name,QString email,QString password)
 {
 query->prepare("INSERT INTO user ( user_name, user_project, user_email, user_password) "
                         "VALUES ( :user_name, :user_project, :user_email, :user_password);");
@@ -31,7 +31,7 @@ if(query->exec()){
 
 }
 
-void Agile::  create_project(QString name,QString owner,QString tasks)
+void project::  create_project(QString name,QString owner,QString tasks)
 {
 
     query->prepare("INSERT INTO project ( project_name, project_owner, project_tasks) "
@@ -47,7 +47,7 @@ void Agile::  create_project(QString name,QString owner,QString tasks)
     }
 }
 
-void Agile:: create_task(QString name, QString project, QString time)
+void task:: create_task(QString name, QString project, QString time)
 {
 
     query->prepare("INSERT INTO task ( task_name, belong_to_project, task_create_time)"
@@ -64,7 +64,7 @@ void Agile:: create_task(QString name, QString project, QString time)
 }
 
 // посмотреть правильность каскадного удаления
-void Agile::delete_user(QString name)
+void user::delete_user(QString name)
 {
     query->exec("DELETE FROM user WHERE user_name=\""+name+"\";");
     query->exec("SELECT FROM project WHERE project_owner=\""+name+"\";");
@@ -84,7 +84,7 @@ void Agile::delete_user(QString name)
     }
 }
 
-void Agile::delete_project(QString name)
+void project::delete_project(QString name)
 {
     query->exec("DELETE FROM project WHERE project_name=\""+name+"\";");
     query->exec("DELETE FROM task WHERE belong_to_project=\""+name+"\";");
@@ -96,7 +96,7 @@ void Agile::delete_project(QString name)
 
 }
 
-void Agile::delete_task(QString name)
+void task::delete_task(QString name)
 {
 query->exec("DELETE FROM task WHERE task_name=\""+name+"\";");
 
@@ -108,7 +108,7 @@ if(query->exec()){
 
 }
 
-void Agile::task_done(QString taskname)
+void task::set_done(QString taskname)
 {
     query->exec("UPDATE task SET  task_is_done=\"1\" WHERE task_name=\""+taskname+"\";");
 
@@ -119,7 +119,7 @@ void Agile::task_done(QString taskname)
     }
 }
 
-void Agile::task_important(QString taskname)
+void task::set_important(QString taskname)
 {
     query->exec("UPDATE task SET  task_is_important=\"1\" WHERE task_name=\""+taskname+"\";");
 
@@ -130,7 +130,7 @@ void Agile::task_important(QString taskname)
     }
 }
 
-void Agile:: task_date(QString taskname, QString date)
+void task:: set_date(QString taskname, QString date)
 {
     query->exec("UPDATE task SET  task_create_time=\""+date+"\" WHERE task_name=\""+taskname+"\";");
 
@@ -141,7 +141,7 @@ void Agile:: task_date(QString taskname, QString date)
     }
 }
 
-void Agile:: change_user_password(QString name, QString newpassword)
+void user:: change_user_password(QString name, QString newpassword)
 {
     query->exec("UPDATE user SET  user_password=\""+newpassword+"\" WHERE user_name=\""+name+"\";");
 
@@ -152,7 +152,7 @@ void Agile:: change_user_password(QString name, QString newpassword)
     }
 }
 
-void Agile:: task_priority(QString taskname, QString pr)
+void task:: set_priority(QString taskname, QString pr)
 {
     query->exec("UPDATE task SET  task_priority=\""+pr+"\" WHERE task_name=\""+taskname+"\";");
 
@@ -163,7 +163,7 @@ void Agile:: task_priority(QString taskname, QString pr)
     }
 }
 
-void Agile:: task_deadline(QString taskname, QString date)
+void task:: set_deadline(QString taskname, QString date)
 {
     query->exec("UPDATE task SET  task_deadline=\""+date+"\" WHERE task_name=\""+taskname+"\";");
 
@@ -173,6 +173,7 @@ void Agile:: task_deadline(QString taskname, QString date)
          qDebug() << "insert failed";
     }
 }
+
 void Agile::select(QString param,QString value)
 {
 
@@ -190,6 +191,5 @@ void Agile::select(QString param,QString value)
    qDebug() << "found: " << endl;
    while(query->next()){
 qDebug() <<query->value(0).toString()<<"-"<<query->value(1).toString(); // работает
-
 }
 }
