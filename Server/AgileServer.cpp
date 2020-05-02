@@ -2,38 +2,48 @@
 
 void AServer::startServer()
 {
-    if (this->listen(QHostAddress::Any,5555))
-    {
-        qDebug()<<"Listening";
-    }
-    else
-    {
-        qDebug()<<"Not listening";
-    }
-   connect(this, &AServer::newConnection, this, &AServer:: incomingConnection);
+    server.listen(QHostAddress::Any,4242);
+    connect(&server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+    qDebug()<<"Listening";
 }
 
-void AServer::incomingConnection()
+void AServer::onNewConnection()
 {
-    socket= this->nextPendingConnection();
-
-    //socket->setSocketDescriptor(socketDescriptor);
-
-        connect(socket,SIGNAL(readyRead()),this,SLOT(sockReady()));
-        connect(socket,SIGNAL(disconnected()),this,SLOT(sockDisc()));
-
-    qDebug()<<" Client connected";
-
-    socket->write("You are connect");
-    qDebug()<<"Send client connect status - YES";
-}
-void AServer::sockReady()
-{
-
+    QTcpSocket *clientSocket = server.nextPendingConnection();
+    connect(clientSocket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(clientSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onSocketStateChanged(QAbstractSocket::SocketState)));
+     sockets.push_back(clientSocket);
+     for (QTcpSocket* socket : sockets) {
+         socket->write(QByteArray::fromStdString(clientSocket->peerAddress().toString().toStdString() + " connected to server !\n"));
+     qDebug()<<QByteArray::fromStdString(clientSocket->peerAddress().toString().toStdString()) + " connected to server !\n";
+     }
 }
 
 void AServer::sockDisc()
 {
     qDebug()<<"Disconnect";
     socket->deleteLater();
+}
+
+// работа с Json
+void AServer::onReadyRead()
+{
+    QTcpSocket* client = static_cast<QTcpSocket*>(QObject::sender());
+    QByteArray datas = client->readAll();
+    for (QTcpSocket* socket : sockets) {
+        if (socket != client)
+            socket->write(QByteArray::fromStdString(client->peerAddress().toString().toStdString() + ": " + datas.toStdString()));
+    }
+
+ QByteArray data = socket->readAll();
+ qDebug()<< data;
+
+}
+void AServer::onSocketStateChanged(QAbstractSocket::SocketState socketState)
+{
+    if (socketState == QAbstractSocket::UnconnectedState)
+    {
+        QTcpSocket* sender = static_cast<QTcpSocket*>(QObject::sender());
+        sockets.removeOne(sender);
+    }
 }

@@ -6,12 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // подключаемся к серверу
-    socket = new QTcpSocket(this);
-     socket->connectToHost("127.0.0.1",5555);
-          connect(socket,SIGNAL(readyRead()),this,SLOT(sockReady()));
-          connect(socket,SIGNAL(disconnected()),this,SLOT(sockDisc()));
-
 }
 
 MainWindow::~MainWindow()
@@ -19,19 +13,39 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::sockDisc()
+void client::con_serv()
 {
-    socket->deleteLater();
+    socket.connectToHost(QHostAddress("127.0.0.1"), 4242);
+    connect(&socket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 }
 
-void MainWindow::sockReady()
+void client::sockDisc()
 {
-    if (socket->waitForConnected(5000))
-    {
-        socket->waitForReadyRead(5000);
-        Data = socket->readAll();
-        qDebug()<<Data;
-    }else qDebug()<<"no -_- ";
+    socket.deleteLater();
 }
 
+void client:: write(QString  data)
+{
+    QJsonObject text;
+    text["title"]=data;
+    QJsonArray t;
+    t.append(text);
+    QJsonDocument doc {{"sgv",t}};
+    socket.write(doc.toJson());
+    socket.flush();
+}
+
+void client::onReadyRead()
+{
+    Data = socket.readAll();
+    qDebug()<<Data;
+    qDebug()<<" kkk";
+    socket.write(QByteArray("ok !\n"));
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    client y;
+    y.con_serv();
+}
 

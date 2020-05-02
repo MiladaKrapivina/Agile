@@ -7,30 +7,30 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QDebug>
+
 class AServer: public QTcpServer
 {
     Q_OBJECT
 
-    public:
-  // AServer();
-  //  ~AServer();
-    QTcpSocket* socket;
     QByteArray Data;
-    QSqlDatabase db;
+    QList<QTcpSocket*> sockets;
+    QTcpServer  server;
+    QTcpSocket* socket;
+protected:
     QSqlQuery *query;
-
-       void connect_to_database(); // поместить в сервер
+    QSqlDatabase db;
+public:
+    void connect_to_database();
+    void startServer();
 
 public slots:
-    void startServer();
-    void incomingConnection();
-void sockReady();
+    void onSocketStateChanged(QAbstractSocket::SocketState socketState);
+    void onNewConnection();
+    void onReadyRead();
     void sockDisc();
 };
 
 
-/*    myserver();
 
-*/
 
 #endif // AGILESERVER_H
