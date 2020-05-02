@@ -48,4 +48,9 @@ void MainWindow::on_pushButton_clicked()
     client y;
     y.con_serv();
 }
+void MainWindow::on_pushButton_2_clicked()
+{
+    client x;
+    x.write(ui->lineEdit->text());
+}
 
