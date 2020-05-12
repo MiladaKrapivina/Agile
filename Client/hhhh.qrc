@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>C:/Users/milad/Pictures/Saved Pictures/matters_desktop.png</file>
+        <file>C:/Users/milad/Pictures/Saved Pictures/подложка.jpg</file>
+        <file>C:/Users/milad/Pictures/Saved Pictures/hhhhhhhh.jpg</file>
+    </qresource>
+</RCC>
