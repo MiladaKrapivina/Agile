@@ -4,7 +4,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-AServer my;
-my.startServer();
+    server_comp main_serv;
+    main_serv.start(4242);
 return a.exec();
 }
+
