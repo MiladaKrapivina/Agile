@@ -1,7 +1,0 @@
-https://habr.com/ru/post/51650/ - синтаксис для написания методов
-https://ru.wikipedia.org/wiki/SQLite для написания преимущества инструментов
-https://yandex.ru/video/preview/?filmId=7144058596684424791&from=tabbar&parent-reqid=1585731578562324-942028122495331242304657-man1-3611&text=сервер+клиент+в+формате+json - одо из моих основных обучающих видео
-https://zametkinapolyah.ru/video-blog/video-sqlite по sqlite
-https://younglinux.info/sqlite/insert -сортировка данных
-https://sqlite.org/lang_corefunc.html - встроенные функции sqlite
-http://doc.crossplatform.ru/qt/4.5.0/qtsql.html#executing-sql-statements
