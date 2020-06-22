@@ -1,35 +1,39 @@
 #ifndef AGILESERVER_H
 #define AGILESERVER_H
 
-#include<QTcpServer>
-#include<QTcpSocket>
-#include <QString>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QDebug>
-
-class AServer: public QTcpServer
+#include "Header.h"
+#include "agile.h"
+class socket_comp : public QThread
 {
     Q_OBJECT
-
-    QByteArray Data;
-    QList<QTcpSocket*> sockets;
-    QTcpServer  server;
-    QTcpSocket* socket;
-protected:
-    QSqlQuery *query;
-    QSqlDatabase db;
 public:
-    void connect_to_database();
-    void startServer();
+    explicit socket_comp(qint32 socket_id, QObject *parent = nullptr);
 
 public slots:
-    void onSocketStateChanged(QAbstractSocket::SocketState socketState);
-    void onNewConnection();
-    void onReadyRead();
-    void sockDisc();
+    void write(QString data);
+    void read_data();
+
+private:
+    void run() override;
+    const int _socket_id;
+    QTcpSocket* _soc;
+    DateBase dometh;
 };
 
+class server_comp : public QObject
+{
+    Q_OBJECT
+public:
+    explicit server_comp(QObject* parent = nullptr);
+
+public slots:
+    void on_new_connection();
+    void start(qint32 port);
+
+private:
+    QTcpServer* _server;
+
+};
 
 
 

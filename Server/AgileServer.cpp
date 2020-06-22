@@ -1,49 +1,113 @@
 #include "AgileServer.h"
 
-void AServer::startServer()
+socket_comp::socket_comp(qint32 socket_id, QObject *parent)
+    : QThread(parent)
+    , _socket_id(socket_id)
 {
-    server.listen(QHostAddress::Any,4242);
-    connect(&server, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-    qDebug()<<"Listening";
 }
 
-void AServer::onNewConnection()
+void socket_comp::write(QString data)
 {
-    QTcpSocket *clientSocket = server.nextPendingConnection();
-    connect(clientSocket, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(clientSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onSocketStateChanged(QAbstractSocket::SocketState)));
-     sockets.push_back(clientSocket);
-     for (QTcpSocket* socket : sockets) {
-         socket->write(QByteArray::fromStdString(clientSocket->peerAddress().toString().toStdString() + " connected to server !\n"));
-     qDebug()<<QByteArray::fromStdString(clientSocket->peerAddress().toString().toStdString()) + " connected to server !\n";
-     }
+    qDebug() << "WRITE";
+     qDebug() << data;
+    _soc->write(data.toUtf8());
 }
 
-void AServer::sockDisc()
+void socket_comp::read_data()
 {
-    qDebug()<<"Disconnect";
-    socket->deleteLater();
+    qDebug() << "READ";
+    QString data = QString::fromUtf8(_soc->readAll());
+    QJsonDocument doc = QJsonDocument::fromJson(data.toUtf8());
+    QJsonObject obj =  doc.object();
+    qDebug()<<"Prishl0::::::::::::::";
+    qDebug()<<obj;
+    QJsonValue value = doc.object().value("meth");
+    int meth=value.toString().toUInt();
+    qDebug()<<"_____"<<meth;
+    switch (meth) {
+    case 1:{
+         dometh.createUser(obj.value("name").toString(),
+                          obj.value("password").toString() );
+         write(dometh.returndata());
+    }break;
+    case 2:{
+         dometh.check_user(obj.value("name").toString(),
+                           obj.value("password").toString() );
+         write(dometh.returndata());
+    }break;
+
+    case 3:{
+         dometh.get_all(obj.value("param").toString(),
+                        obj.value("id").toInt());
+         write(dometh.returndata());
+    }break;
+    case 4:{
+         dometh.get_task_info( obj.value("id").toInt());
+         write(dometh.returndata());
+    }break;
+    case 5:{
+         dometh.create(obj.value("param").toString(),
+                       obj.value("name").toString(),
+                       obj.value("id").toInt());
+
+    }break;
+    case 6:{
+        QString temp;
+        if(obj.value("value").toString().isEmpty()){
+            int i=obj.value("value").toInt();
+             temp=QString::number(i);
+        }else{
+        temp=obj.value("value").toString();
+        }
+         dometh.set_(obj.value("param").toString(),
+                     obj.value("id").toInt(),
+                    temp);
+
+    }break;
+    case 7:{
+        dometh.delete_(obj.value("param").toString(),
+                       obj.value("id").toInt());
+    }break;
+    case 9:{
+        dometh.get_tasklist(obj.value("param").toString(),
+                            obj.value("id").toInt());
+        write(dometh.returndata());
+    }break;
 }
-
-// работа с Json
-void AServer::onReadyRead()
-{
-    QTcpSocket* client = static_cast<QTcpSocket*>(QObject::sender());
-    QByteArray datas = client->readAll();
-    for (QTcpSocket* socket : sockets) {
-        if (socket != client)
-            socket->write(QByteArray::fromStdString(client->peerAddress().toString().toStdString() + ": " + datas.toStdString()));
-    }
-
- QByteArray data = socket->readAll();
- qDebug()<< data;
-
 }
-void AServer::onSocketStateChanged(QAbstractSocket::SocketState socketState)
+void socket_comp::run()
 {
-    if (socketState == QAbstractSocket::UnconnectedState)
+_soc = new QTcpSocket();
+    if (_soc->setSocketDescriptor(_socket_id))
     {
-        QTcpSocket* sender = static_cast<QTcpSocket*>(QObject::sender());
-        sockets.removeOne(sender);
-    }
+        connect(_soc, &QTcpSocket::readyRead, this, &socket_comp::read_data, Qt::DirectConnection);
+        connect(_soc, &QTcpSocket::disconnected, this, &socket_comp::quit);
+        connect(_soc, &QTcpSocket::disconnected, _soc, &QTcpSocket::deleteLater);
+        qDebug() << "Connection started";
+        exec();
+        qDebug() << "Connection ends";
+    } else qDebug() << "Something wrong";
+}
+
+server_comp::server_comp(QObject *parent)
+    : QObject(parent)
+    , _server(new QTcpServer(this))
+{
+    connect(_server, &QTcpServer::newConnection, this, &server_comp::on_new_connection);
+}
+
+void server_comp::on_new_connection()
+{
+    qDebug() << "Get new connection";
+    QTcpSocket* soc = _server->nextPendingConnection();
+    qint32 id = soc->socketDescriptor();
+    socket_comp* socket_th = new socket_comp(id);
+    connect(socket_th, &socket_comp::finished, socket_th, &socket_comp::deleteLater);
+    socket_th->start();
+}
+
+void server_comp::start(qint32 port)
+{
+    _server->listen(QHostAddress::Any, port);
+    qDebug() << "Server start at port " << port;
 }
